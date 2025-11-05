@@ -3,75 +3,282 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ink by DARIO</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Ink by DARIO — Editable</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  :root{--bg:#050506;--muted:#b3aca3;--accent:#ad7c46;--text:#f6f5f3}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg),#0b0706);color:var(--text)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
+  .btn{background:var(--accent);color:#060606;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+  main{max-width:1200px;margin:22px auto;padding:12px}
+  .cover{height:420px;border-radius:12px;overflow:hidden;position:relative;background:#111;display:flex;align-items:center;justify-content:center}
+  .cover img{width:100%;height:100%;object-fit:cover;filter:brightness(.6)}
+  .overlay{position:absolute;left:20px;bottom:20px;color:var(--text)}
+  .editable{outline: 2px dashed transparent}
+  .editing .editable{outline:2px dashed rgba(255,200,0,.25)}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+  .gallery img{width:100%;height:220px;object-fit:cover;border-radius:8px}
+  footer{padding:20px;text-align:center;color:var(--muted)}
+  .admin-bar{position:fixed;right:12px;top:12px;z-index:999;display:flex;gap:8px}
+  input[type=file]{display:none}
+  .small{font-size:13px;color:var(--muted)}
+</style>
 </head>
 <body>
+
+<div class="admin-bar" id="adminBar" style="display:none">
+  <button class="btn" id="editBtn">Editar</button>
+  <button class="btn" id="saveBtn">Guardar</button>
+  <button class="btn" id="logoutBtn">Salir</button>
+</div>
+
 <header>
-  <div class="brand">
-    <div class="logo">IBD</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:56px;height:56px;border-radius:8px;background:#0b0b0b;display:flex;align-items:center;justify-content:center;font-weight:800">IBD</div>
     <div>
-      <div class="site-title" id="siteTitle">Ink by DARIO</div>
-      <div class="site-tag" id="siteTag">Arte que deja marca</div>
+      <div id="siteName" contenteditable="false" class="editable">Ink by DARIO</div>
+      <div id="siteTag" contenteditable="false" class="small editable">Arte que deja marca</div>
     </div>
   </div>
-  <div class="actions">
-    <button id="langBtn" class="btn-ghost">EN</button>
-    <a href="admin.html" class="btn-ghost">Admin</a>
+  <div>
+    <button id="loginBtn" class="btn">Acceder</button>
   </div>
 </header>
 
-<main>
-  <section class="cover card" id="coverBox" aria-label="Portada"></section>
-
-  <section id="intro" class="card">
-    <h1 id="heroTitle">Ink by DARIO</h1>
-    <p id="heroSubtitle">Arte que deja marca</p>
-    <div class="hero-actions">
-      <a class="btn" href="#contact">Reservar ahora</a>
-      <a class="btn-ghost" href="#gallerySection">Ver portafolio</a>
+<main id="mainContent">
+  <section class="cover card">
+    <img id="coverImg" src="IMG_6967.jpeg" alt="Portada">
+    <div class="overlay">
+      <div style="font-weight:800;font-size:22px" id="heroTitle" contenteditable="false" class="editable">Ink by DARIO</div>
+      <div class="small" id="heroSub" contenteditable="false" class="editable">Arte que deja marca</div>
     </div>
   </section>
 
-  <section id="gallerySection" class="card">
-    <h2 id="galleryTitle">Galería</h2>
-    <div id="gallery" class="gallery" aria-live="polite"></div>
+  <section class="card" style="padding:14px;margin-top:12px">
+    <h2>Galería</h2>
+    <div class="gallery" id="gallery"></div>
+    <div style="margin-top:10px">
+      <label for="galleryInput" class="btn" id="uploadLabel" style="display:none;cursor:pointer">Subir imágenes</label>
+      <input id="galleryInput" type="file" accept="image/*" multiple>
+      <div class="small">Máx 50 imágenes</div>
+    </div>
   </section>
 
-  <section id="contact" class="card">
-    <h2 id="contactTitle">Reservar cita</h2>
-    <form id="bookingForm">
-      <label>Nombre completo<input id="name" required type="text" placeholder="Ej. Ana Pérez"></label>
-      <label>Correo<input id="email" type="email" placeholder="ejemplo@mail.com"></label>
-      <label>WhatsApp<input id="phone" type="text" placeholder="+52 55 ..."></label>
-      <label>Tamaño del tatuaje
-        <select id="size"><option>Pequeño</option><option>Mediano</option><option>Grande</option></select>
-      </label>
-      <label>Fecha<input id="date" required type="date"></label>
-      <label>Hora<input id="time" required type="time" step="900"></label>
-      <label>Descripción / Idea<textarea id="notes" placeholder="Describe el diseño..."></textarea></label>
-      <label>Referencia (opcional)<input id="refFile" type="file" accept="image/*"></label>
-      <div class="row">
-        <button class="btn" type="submit">Solicitar reserva</button>
-        <div id="formMsg" style="color:var(--muted)"></div>
-      </div>
+  <section class="card" id="contactSection" style="margin-top:12px">
+    <h2>Reservas</h2>
+    <form id="bookingForm" name="reservas" method="POST" data-netlify="true">
+      <label>Nombre completo<input name="nombre" required></label><br>
+      <label>Correo<input name="correo" type="email" required></label><br>
+      <label>WhatsApp<input name="telefono"></label><br>
+      <label>Descripción<textarea name="descripcion"></textarea></label><br>
+      <label>Fecha<input type="date" name="fecha" required></label><br>
+      <button type="submit" class="btn">Enviar reserva</button>
     </form>
+    <div id="bookingMsg" class="small"></div>
   </section>
-
-  <footer>
-    © <span id="year"></span> Ink by DARIO · <a id="mailLink" href="mailto:inkbydario@outlook.com">inkbydario@outlook.com</a> · <a id="igLink" href="https://instagram.com/inkbydario" target="_blank">Instagram</a>
-  </footer>
 </main>
 
-<!-- modal -->
-<div id="modal" class="modal" role="dialog" aria-hidden="true">
-  <div class="box card">
-    <button id="closeModal" class="close">✕</button>
-    <img id="modalImg" src="" alt="ampliado">
-  </div>
-</div>
+<footer>
+  © <span id="year"></span> Ink by DARIO · <a href="mailto:inkbydario@outlook.com">inkbydario@outlook.com</a>
+</footer>
 
-<script src="script.js"></script>
+<script>
+/* ========== CONFIG ========== */
+const ADMIN_PASSWORD_PROMPT = true; // true pide contraseña al intentar acceder
+/* ========== STATE ========== */
+let isEditing = false;
+let tokenLoaded = false;
+
+/* ========== UI ========== */
+const loginBtn = document.getElementById('loginBtn');
+const adminBar = document.getElementById('adminBar');
+const editBtn = document.getElementById('editBtn');
+const saveBtn = document.getElementById('saveBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const galleryEl = document.getElementById('gallery');
+const galleryInput = document.getElementById('galleryInput');
+const uploadLabel = document.getElementById('uploadLabel');
+
+/* ========== UTIL ========== */
+function $(sel){ return document.querySelector(sel); }
+function t(s){ return document.createTextNode(s); }
+
+/* ========== AUTH (contraseña simple, verificada por función Netlify) ========== */
+async function promptLogin(){
+  const pw = prompt('Contraseña de administrador:');
+  if(!pw) return false;
+  // Verificar con función: POST /.netlify/functions/auth-check { password }
+  try{
+    const res = await fetch('/.netlify/functions/auth-check', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pw })
+    });
+    const j = await res.json();
+    if(j && j.ok){
+      sessionStorage.setItem('isAdmin','true');
+      adminBar.style.display = 'flex';
+      loginBtn.style.display = 'none';
+      return true;
+    } else {
+      alert('Contraseña incorrecta');
+      return false;
+    }
+  }catch(e){
+    alert('Error al validar contraseña. Asegura que Netlify Functions esté desplegada.');
+    return false;
+  }
+}
+
+/* ========== LOGIN / LOGOUT ========== */
+loginBtn.addEventListener('click', async ()=> {
+  const ok = await promptLogin();
+  if(ok) loadEditableState();
+});
+logoutBtn.addEventListener('click', ()=> {
+  sessionStorage.removeItem('isAdmin');
+  adminBar.style.display = 'none';
+  loginBtn.style.display = 'inline-block';
+  location.reload();
+});
+
+/* ========== EDIT MODE ========== */
+function enableEditing(enable){
+  isEditing = enable;
+  document.body.classList.toggle('editing', enable);
+  const editables = document.querySelectorAll('.editable');
+  editables.forEach(el => el.contentEditable = enable);
+  uploadLabel.style.display = enable ? 'inline-block' : 'none';
+}
+
+editBtn.addEventListener('click', ()=> {
+  enableEditing(!isEditing);
+});
+
+/* ========== GALLERY MANAGEMENT ========== */
+function renderGallery(imgs){
+  galleryEl.innerHTML = '';
+  imgs.forEach((src, i)=>{
+    const div = document.createElement('div');
+    const img = document.createElement('img');
+    img.src = src;
+    img.draggable = true;
+    img.dataset.index = i;
+    img.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', e.target.dataset.index));
+    img.addEventListener('dragover', e=> e.preventDefault());
+    img.addEventListener('drop', e=>{
+      const from = e.dataTransfer.getData('text/plain');
+      const to = e.target.dataset.index;
+      reorderGallery(parseInt(from), parseInt(to));
+    });
+    div.appendChild(img);
+    galleryEl.appendChild(div);
+  });
+}
+
+function reorderGallery(from, to){
+  const imgs = loadGallery();
+  const item = imgs.splice(from,1)[0];
+  imgs.splice(to,0,item);
+  saveGalleryLocal(imgs);
+  renderGallery(imgs);
+}
+
+function loadGallery(){
+  try{ return JSON.parse(localStorage.getItem('ink_gallery')||'[]'); }catch(e){ return []; }
+}
+function saveGalleryLocal(arr){ localStorage.setItem('ink_gallery', JSON.stringify(arr)); }
+
+/* subir imágenes: enviamos base64 al function que sube al repo */
+galleryInput.addEventListener('change', async (e)=>{
+  const files = Array.from(e.target.files || []);
+  const existing = loadGallery();
+  if(existing.length + files.length > 50){ alert('Máx 50 imágenes'); return; }
+  for(const f of files){
+    const b64 = await fileToBase64(f);
+    // pedir a function que guarde y devuelva url pública
+    try{
+      const res = await fetch('/.netlify/functions/save-image', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ filename: f.name, data: b64, password: await getStoredPassword() })
+      });
+      const j = await res.json();
+      if(j && j.url){
+        existing.push(j.url);
+        saveGalleryLocal(existing);
+        renderGallery(existing);
+      } else {
+        console.error('Error al subir imagen', j);
+        alert('Error subiendo imagen: '+(j && j.error ? j.error : 'sin detalle'));
+      }
+    }catch(err){ console.error(err); alert('Error red'); }
+  }
+  e.target.value = '';
+});
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const r = new FileReader();
+    r.onload = ()=> resolve(r.result.split(',')[1]); // solo base64
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ========== SAVE PAGE (envía HTML y galería al function) ========== */
+saveBtn.addEventListener('click', async ()=>{
+  if(!confirm('¿Publicar cambios en tu sitio público?')) return;
+  const html = buildUpdatedHTML();
+  const pw = await getStoredPassword();
+  try{
+    const res = await fetch('/.netlify/functions/save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ path:'index.html', content: html, password: pw })
+    });
+    const j = await res.json();
+    if(j && j.ok){
+      alert('✅ Cambios publicados correctamente. Recarga la página pública en 30-60s.');
+      // actualizamos local gallery si la función devolvió urls
+      if(j.gallery) { saveGalleryLocal(j.gallery); renderGallery(j.gallery); }
+    } else {
+      alert('Error al publicar: ' + (j && j.error ? j.error : 'sin detalle'));
+      console.error(j);
+    }
+  }catch(e){ console.error(e); alert('Error de conexión al publicar'); }
+});
+
+/* arma el HTML actualizado tomando los nodos editables + galería */
+function buildUpdatedHTML(){
+  // Clonar el HTML base y reemplazar partes con valores actuales
+  let doc = document.documentElement.cloneNode(true);
+  // quitar la barra admin del documento que vamos a guardar
+  const adminNode = doc.querySelector('#adminBar');
+  if(adminNode) adminNode.remove();
+  // Serializar: tomamos outerHTML del <html> y lo retornamos como string
+  return '<!doctype html>\\n' + doc.outerHTML;
+}
+
+/* ========== HELPERS ========== */
+async function getStoredPassword(){
+  // si en sesión ya está almacenada, devolver; si no, pedir prompt y almacenar
+  let pw = sessionStorage.getItem('admin_pw');
+  if(!pw){
+    pw = prompt('Ingresa tu contraseña para publicar (se guardará en esta sesión):');
+    if(pw) sessionStorage.setItem('admin_pw', pw);
+  }
+  return pw;
+}
+
+/* ========== INIT ========== */
+(function init(){
+  document.getElementById('year').textContent = new Date().getFullYear();
+  // cargar galería local
+  renderGallery(loadGallery());
+  // si ya autenticado por sesión mostrar barra
+  if(sessionStorage.getItem('isAdmin')==='true'){ adminBar.style.display='flex'; loginBtn.style.display='none'; }
+})();
+</script>
 </body>
 </html>
