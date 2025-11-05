@@ -20,6 +20,7 @@
     h1 {
       font-size: 2rem;
       letter-spacing: 2px;
+      margin-bottom: 10px;
     }
     .btn {
       background: #fff;
@@ -47,40 +48,36 @@
   <div class="info" id="info"></div>
 
   <script>
-    // Tu Client ID de GitHub
-    const clientId = "Ov23liHu797WDPs74sex"; // <-- Aquí tu Client ID
+    const clientId = "Ov23liHu797WDPs74sex"; // Tu client ID
     const redirectUri = "https://inkbydario.github.io/admin.html";
+    const proxyUrl = "https://oauth-proxy.deno.dev"; // Proxy temporal
 
-    // Paso 1: si no hay token, redirige al login de GitHub
+    // Obtener el parámetro "code" si existe
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
     document.getElementById("loginBtn").addEventListener("click", () => {
-      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo`;
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,user`;
       window.location.href = authUrl;
     });
 
     if (code) {
-      document.getElementById("info").innerText = "Autenticando...";
-      fetch(`https://github.com/login/oauth/access_token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: client_secret: "e1c395e6780101b22b74279ff7b5df5faa59a090",
-          code: code,
-          redirect_uri: redirectUri
+      document.getElementById("info").innerText = "Autenticando con GitHub...";
+      fetch(`${proxyUrl}/access_token?client_id=${clientId}&client_secret=e1c395e6780101b22b74279ff7b5df5faa59a090&code=${code}&redirect_uri=${redirectUri}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.access_token) {
+            localStorage.setItem("github_token", data.access_token);
+            document.getElementById("info").innerHTML = "✅ Sesión iniciada con éxito. Redirigiendo...";
+            setTimeout(() => window.location.href = "index.html", 1500);
+          } else {
+            document.getElementById("info").innerText = "❌ Error al autenticar.";
+          }
         })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.access_token) {
-          localStorage.setItem("github_token", data.access_token);
-          window.location.href = "index.html";
-        } else {
-          document.getElementById("info").innerText = "Error al autenticar.";
-        }
-      });
+        .catch(err => {
+          document.getElementById("info").innerText = "⚠️ Error de conexión con GitHub.";
+          console.error(err);
+        });
     }
   </script>
 </body>
