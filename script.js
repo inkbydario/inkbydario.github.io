@@ -1,5 +1,5 @@
 // CONFIGURACIÓN BÁSICA
-const GITHUB_TOKEN = "f0fccf406e752da59836853efc1fffb8"; // Tu token
+const GITHUB_TOKEN = ""; // Token se cargará desde un Secret
 const REPO = "inkbydario/inkbydario.github.io"; // Tu repositorio
 const BRANCH = "main"; // Rama principal
 
@@ -7,17 +7,15 @@ const BRANCH = "main"; // Rama principal
 async function updateFileOnGitHub(path, content) {
   const apiUrl = `https://api.github.com/repos/${REPO}/contents/${path}`;
 
-  // Primero obtenemos el SHA del archivo actual
+  // Obtenemos la versión actual del archivo
   const currentFile = await fetch(apiUrl, {
     headers: { Authorization: `token ${GITHUB_TOKEN}` }
   }).then(res => res.json());
 
   const sha = currentFile.sha;
-
-  // Codificamos el nuevo contenido en Base64
   const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
-  // Subimos los cambios
+  // Subimos los cambios a GitHub
   const response = await fetch(apiUrl, {
     method: "PUT",
     headers: {
@@ -36,10 +34,11 @@ async function updateFileOnGitHub(path, content) {
     alert("✅ Cambios guardados y publicados en tu sitio.");
   } else {
     alert("❌ Error al guardar en GitHub. Revisa tu token o conexión.");
+    console.error(await response.text());
   }
 }
 
-// Escucha el botón "Guardar" del panel admin
+// Escucha el botón "Guardar y Publicar" del panel admin
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const updatedHTML = document.documentElement.outerHTML;
   await updateFileOnGitHub("index.html", updatedHTML);
