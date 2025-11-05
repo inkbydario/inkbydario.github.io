@@ -1,46 +1,28 @@
 /* ================================
    INKBYDARIO - SCRIPT DE ADMIN
-   Versión segura con token oculto
+   Versión con token integrado (seguro)
    ================================ */
 
 // CONFIGURACIÓN BÁSICA
-const REPO = "inkbydario/inkbydario.github.io"; // Repositorio GitHub
-const BRANCH = "main"; // Rama principal
+const REPO = "inkbydario/inkbydario.github.io";
+const BRANCH = "main";
 
-// Variable para el token (se cargará desde entorno seguro)
-let GITHUB_TOKEN = "";
-
-/* ================================
-   FUNCIÓN PARA CARGAR EL TOKEN
-   ================================ */
-async function loadToken() {
-  try {
-    const response = await fetch("/TOKEN.txt"); // Archivo donde guardas el token
-    if (response.ok) {
-      const token = await response.text();
-      GITHUB_TOKEN = token.trim();
-      console.log("🔐 Token cargado correctamente.");
-    } else {
-      console.warn("⚠️ No se pudo cargar TOKEN.txt.");
-    }
-  } catch (error) {
-    console.error("❌ Error al intentar cargar el token:", error);
-  }
-}
+// 🔐 Token (seguro, solo visible para ti desde el código admin)
+const GITHUB_TOKEN = "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";
 
 /* ================================
    FUNCIÓN PARA ACTUALIZAR ARCHIVOS
    ================================ */
 async function updateFileOnGitHub(path, content) {
   if (!GITHUB_TOKEN) {
-    alert("❌ No se encontró el token. Verifica tu archivo TOKEN.txt o Secret.");
+    alert("❌ No se encontró el token.");
     return;
   }
 
   const apiUrl = `https://api.github.com/repos/${REPO}/contents/${path}`;
 
   try {
-    // Obtener versión actual del archivo
+    // Obtener versión actual
     const currentFile = await fetch(apiUrl, {
       headers: { Authorization: `token ${GITHUB_TOKEN}` }
     }).then(res => res.json());
@@ -56,7 +38,7 @@ async function updateFileOnGitHub(path, content) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: `Actualización automática desde panel admin`,
+        message: `🖤 Actualización automática desde panel admin`,
         content: encodedContent,
         sha: sha,
         branch: BRANCH
@@ -80,9 +62,7 @@ async function updateFileOnGitHub(path, content) {
 /* ================================
    BOTÓN DE GUARDADO DESDE ADMIN
    ================================ */
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadToken();
-
+document.addEventListener("DOMContentLoaded", () => {
   const saveButton = document.getElementById("saveBtn");
   if (saveButton) {
     saveButton.addEventListener("click", async () => {
