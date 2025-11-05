@@ -21,8 +21,8 @@ async function handleGitHubRedirect() {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
-        client_id: CLIENT_ID = "Ov23liHu797WDPs74sex";
-        client_secret: CLIENT_SECRET = "e1c395e6780101b22b74279ff7b5df5faa59a090";
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
         code: code,
         redirect_uri: REDIRECT_URI
       })
