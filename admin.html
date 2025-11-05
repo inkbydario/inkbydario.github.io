@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Admin — Ink by DARIO</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<main style="max-width:1100px;margin:18px auto;padding:12px">
+  <h1>Panel de administración</h1>
+  <div id="loginBox" class="card">
+    <p>Ingresa la contraseña para administrar el sitio.</p>
+    <input id="pw" type="password" placeholder="Contraseña">
+    <div style="margin-top:8px">
+      <button id="loginBtn" class="btn">Entrar</button>
+      <span style="color:var(--muted);margin-left:8px">Contraseña: <strong>dario123</strong></span>
+    </div>
+    <div id="loginMsg" style="color:var(--muted);margin-top:8px"></div>
+  </div>
+
+  <div id="adminUI" style="display:none">
+    <div class="card">
+      <h2>Contenido del sitio</h2>
+      <label>Nombre artístico<input id="studioName"></label>
+      <label>Frase / subtítulo<input id="studioTag"></label>
+      <label>Horarios<input id="horarios"></label>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="saveSite" class="btn">Guardar cambios</button>
+        <button id="resetSite" class="btn-ghost">Restablecer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Imagen de portada</h2>
+      <input id="heroFile" type="file" accept="image/*">
+      <div id="heroPreview" style="margin-top:10px"></div>
+      <div style="margin-top:8px"><button id="removeHero" class="btn-ghost">Eliminar portada</button></div>
+    </div>
+
+    <div class="card">
+      <h2>Galería (máx 50)</h2>
+      <input id="galleryFile" type="file" accept="image/*" multiple>
+      <div style="margin-top:8px;color:var(--muted)">Sube imágenes y luego arrástralas para cambiar el orden.</div>
+      <div id="galleryAdmin" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button id="saveToGitHub" class="btn-ghost">Guardar orden en GitHub (opcional)</button>
+        <button id="exportJson" class="btn">Exportar JSON</button>
+      </div>
+      <div style="margin-top:8px;color:var(--muted)">Para publicar de forma global automática, pega tu <strong>Personal Access Token</strong> de GitHub en la casilla que aparecerá al guardar en GitHub.</div>
+      <div id="ghBox" style="margin-top:8px;display:none">
+        <label>Owner / repo (ej. username/inkbydario.github.io)<input id="ghRepo" placeholder="usuario/inkbydario.github.io"></label>
+        <label>Token (PAT) <input id="ghToken" placeholder="ghp_xxx..."></label>
+        <button id="confirmGh" class="btn">Confirmar y guardar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Reservas</h2>
+      <div id="bookingsList"></div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button id="exportCsv" class="btn-ghost">Exportar CSV</button>
+        <button id="clearBookings" class="btn-ghost">Borrar todas</button>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button id="logout" class="btn-ghost">Cerrar sesión</button>
+    </div>
+  </div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

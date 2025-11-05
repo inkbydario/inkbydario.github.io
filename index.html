@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ink by DARIO</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">IBD</div>
+    <div>
+      <div class="site-title" id="siteTitle">Ink by DARIO</div>
+      <div class="site-tag" id="siteTag">Arte que deja marca</div>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="langBtn" class="btn-ghost">EN</button>
+    <a href="admin.html" class="btn-ghost">Admin</a>
+  </div>
+</header>
+
+<main>
+  <section class="cover card" id="coverBox" aria-label="Portada"></section>
+
+  <section id="intro" class="card">
+    <h1 id="heroTitle">Ink by DARIO</h1>
+    <p id="heroSubtitle">Arte que deja marca</p>
+    <div class="hero-actions">
+      <a class="btn" href="#contact">Reservar ahora</a>
+      <a class="btn-ghost" href="#gallerySection">Ver portafolio</a>
+    </div>
+  </section>
+
+  <section id="gallerySection" class="card">
+    <h2 id="galleryTitle">Galería</h2>
+    <div id="gallery" class="gallery" aria-live="polite"></div>
+  </section>
+
+  <section id="contact" class="card">
+    <h2 id="contactTitle">Reservar cita</h2>
+    <form id="bookingForm">
+      <label>Nombre completo<input id="name" required type="text" placeholder="Ej. Ana Pérez"></label>
+      <label>Correo<input id="email" type="email" placeholder="ejemplo@mail.com"></label>
+      <label>WhatsApp<input id="phone" type="text" placeholder="+52 55 ..."></label>
+      <label>Tamaño del tatuaje
+        <select id="size"><option>Pequeño</option><option>Mediano</option><option>Grande</option></select>
+      </label>
+      <label>Fecha<input id="date" required type="date"></label>
+      <label>Hora<input id="time" required type="time" step="900"></label>
+      <label>Descripción / Idea<textarea id="notes" placeholder="Describe el diseño..."></textarea></label>
+      <label>Referencia (opcional)<input id="refFile" type="file" accept="image/*"></label>
+      <div class="row">
+        <button class="btn" type="submit">Solicitar reserva</button>
+        <div id="formMsg" style="color:var(--muted)"></div>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    © <span id="year"></span> Ink by DARIO · <a id="mailLink" href="mailto:inkbydario@outlook.com">inkbydario@outlook.com</a> · <a id="igLink" href="https://instagram.com/inkbydario" target="_blank">Instagram</a>
+  </footer>
+</main>
+
+<!-- modal -->
+<div id="modal" class="modal" role="dialog" aria-hidden="true">
+  <div class="box card">
+    <button id="closeModal" class="close">✕</button>
+    <img id="modalImg" src="" alt="ampliado">
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
