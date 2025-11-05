@@ -3,82 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel — Ink by DARIO</title>
+  <title>Panel de administración — Ink by Dario</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
-      margin: 0;
+      background: linear-gradient(180deg, #000000, #0f0f0f);
+      color: white;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
-      color: #fff;
-      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      height: 100vh;
       text-align: center;
     }
-    h1 {
-      font-size: 2rem;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
+    #login {
+      background: rgba(255,255,255,0.05);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
     }
-    .btn {
+    input {
+      margin: 10px;
+      padding: 10px;
+      width: 200px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
       background: #fff;
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: 0.3s;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    .btn:hover {
-      background: #f4f4f4;
-      transform: scale(1.03);
-    }
-    .info {
-      margin-top: 20px;
-      color: #ccc;
+    #panel {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>Panel de administración</h1>
-  <p>Ink by DARIO</p>
-  <a class="btn" id="loginBtn" href="#">Iniciar sesión con GitHub</a>
-  <div class="info" id="info"></div>
+  <div id="login">
+    <h2>Acceso al administrador</h2>
+    <p>Introduce la contraseña para continuar</p>
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="checkPassword()">Entrar</button>
+  </div>
+
+  <div id="panel">
+    <h1>Bienvenido, Dario 👋</h1>
+    <p>Aquí podrás editar tu página, subir imágenes y gestionar tu galería.</p>
+    <button onclick="logout()">Cerrar sesión</button>
+    <!-- Aquí se pueden agregar más funciones después -->
+  </div>
 
   <script>
-    const clientId = "Ov23liHu797WDPs74sex"; // Tu client ID
-    const redirectUri = "https://inkbydario.github.io/admin.html";
-    const proxyUrl = "https://oauth-proxy.deno.dev"; // Proxy temporal
+    const ADMIN_PASSWORD = "inkdario2025"; // 🔒 cámbiala cuando quieras
 
-    // Obtener el parámetro "code" si existe
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,user`;
-      window.location.href = authUrl;
-    });
-
-    if (code) {
-      document.getElementById("info").innerText = "Autenticando con GitHub...";
-      fetch(`${proxyUrl}/access_token?client_id=${clientId}&client_secret=e1c395e6780101b22b74279ff7b5df5faa59a090&code=${code}&redirect_uri=${redirectUri}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.access_token) {
-            localStorage.setItem("github_token", data.access_token);
-            document.getElementById("info").innerHTML = "✅ Sesión iniciada con éxito. Redirigiendo...";
-            setTimeout(() => window.location.href = "index.html", 1500);
-          } else {
-            document.getElementById("info").innerText = "❌ Error al autenticar.";
-          }
-        })
-        .catch(err => {
-          document.getElementById("info").innerText = "⚠️ Error de conexión con GitHub.";
-          console.error(err);
-        });
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === ADMIN_PASSWORD) {
+        localStorage.setItem("isAdmin", "true");
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+      } else {
+        alert("Contraseña incorrecta ❌");
+      }
     }
+
+    function logout() {
+      localStorage.removeItem("isAdmin");
+      document.getElementById("panel").style.display = "none";
+      document.getElementById("login").style.display = "block";
+    }
+
+    window.onload = () => {
+      if (localStorage.getItem("isAdmin") === "true") {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+      }
+    };
   </script>
 </body>
 </html>
