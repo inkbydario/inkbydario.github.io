@@ -3,162 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de administración — Ink by Dario</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Panel de administración — Ink by DARIO</title>
   <style>
     body {
-      background: linear-gradient(180deg, #000000, #0f0f0f);
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      background-color: #0d0d0d;
+      color: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       margin: 0;
-      text-align: center;
     }
-    header {
-      padding: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+
+    h1 {
+      color: #ffcc00;
+      margin-bottom: 20px;
     }
+
+    textarea {
+      width: 80%;
+      height: 300px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #1a1a1a;
+      color: #f2f2f2;
+      padding: 10px;
+      resize: none;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
     button {
-      margin: 10px;
-      padding: 10px 20px;
-      background: white;
-      color: black;
+      background-color: #ffcc00;
+      color: #000;
+      padding: 10px 25px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      transition: all 0.3s ease;
     }
-    #login, #panel { display: none; }
-    .editable { border: 1px dashed rgba(255,255,255,0.3); padding: 5px; border-radius: 5px; cursor: text; }
-    .gallery { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; gap: 10px; }
-    .gallery img { width: 150px; height: 150px; object-fit: cover; border-radius: 5px; cursor: move; }
-    #cover-preview { width: 90%; max-width: 600px; border-radius: 10px; margin-top: 20px; }
+
+    button:hover {
+      background-color: #ffd633;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Panel de Administración — Ink by Dario</h1>
-  </header>
 
-  <!-- Login -->
-  <div id="login">
-    <h2>Acceso al administrador</h2>
-    <p>Introduce la contraseña para continuar</p>
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="checkPassword()">Entrar</button>
-  </div>
+<script>
+  // 🔒 Protección con contraseña
+  const password = "JasonyLoki15"; // ← Cambia esta contraseña cuando quieras
+  const input = prompt("🔐 Ingresa la contraseña para acceder al panel de administración:");
+  if (input !== password) {
+    alert("❌ Contraseña incorrecta. Redirigiendo a la página principal...");
+    window.location.href = "index.html";
+  }
+</script>
 
-  <!-- Panel -->
-  <div id="panel">
-    <h2>Bienvenido, Dario 👋</h2>
-    <p>Edita tu página fácilmente</p>
+  <h1>Panel de administración — Ink by DARIO</h1>
+  <p>Edita el contenido de tu página principal y presiona guardar:</p>
 
-    <h3>Editar texto principal:</h3>
-    <div id="editable-text" class="editable" contenteditable="true">
-      Arte que deja marca
-    </div>
-
-    <h3>Imagen de portada:</h3>
-    <input type="file" id="cover-upload" accept="image/*">
-    <img id="cover-preview" src="IMG_6967.jpeg" alt="Portada">
-
-    <h3>Galería (máx. 50 fotos):</h3>
-    <input type="file" id="gallery-upload" multiple accept="image/*">
-    <div class="gallery" id="gallery"></div>
-
-    <button onclick="saveChanges()">💾 Guardar cambios</button>
-    <button onclick="logout()">Cerrar sesión</button>
-  </div>
+  <textarea id="contentArea" placeholder="Escribe o pega aquí el nuevo HTML para index.html..."></textarea>
+  <br>
+  <button id="saveBtn">💾 Guardar cambios</button>
 
   <script>
-    const ADMIN_PASSWORD = "JasonyLoki15";
-
-    function checkPassword() {
-      const input = document.getElementById("password").value;
-      if (input === ADMIN_PASSWORD) {
-        localStorage.setItem("isAdmin", "true");
-        document.getElementById("login").style.display = "none";
-        document.getElementById("panel").style.display = "block";
-        loadSavedData();
-      } else {
-        alert("Contraseña incorrecta ❌");
+    // Cargar el archivo index.html actual para editar
+    async function loadCurrentContent() {
+      try {
+        const response = await fetch("index.html");
+        const text = await response.text();
+        document.getElementById("contentArea").value = text;
+      } catch (error) {
+        console.error("Error cargando index.html:", error);
+        alert("No se pudo cargar el contenido actual.");
       }
     }
 
-    function logout() {
-      localStorage.removeItem("isAdmin");
-      document.getElementById("panel").style.display = "none";
-      document.getElementById("login").style.display = "block";
-    }
-
-    function saveChanges() {
-      const text = document.getElementById("editable-text").innerText;
-      const cover = document.getElementById("cover-preview").src;
-      const galleryImages = Array.from(document.querySelectorAll(".gallery img")).map(img => img.src);
-
-      localStorage.setItem("pageText", text);
-      localStorage.setItem("coverImage", cover);
-      localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
-
-      alert("Cambios guardados ✅");
-    }
-
-    function loadSavedData() {
-      const text = localStorage.getItem("pageText");
-      const cover = localStorage.getItem("coverImage");
-      const gallery = JSON.parse(localStorage.getItem("galleryImages") || "[]");
-
-      if (text) document.getElementById("editable-text").innerText = text;
-      if (cover) document.getElementById("cover-preview").src = cover;
-      const galleryDiv = document.getElementById("gallery");
-      galleryDiv.innerHTML = "";
-      gallery.forEach(src => {
-        const img = document.createElement("img");
-        img.src = src;
-        galleryDiv.appendChild(img);
-      });
-    }
-
-    document.getElementById("cover-upload").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = event => document.getElementById("cover-preview").src = event.target.result;
-        reader.readAsDataURL(file);
-      }
+    // Guardar cambios en localStorage (solo vista previa, sin GitHub)
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const newContent = document.getElementById("contentArea").value;
+      localStorage.setItem("previewIndex", newContent);
+      alert("✅ Cambios guardados localmente. Abre la vista pública para revisar.");
     });
 
-    document.getElementById("gallery-upload").addEventListener("change", e => {
-      const files = Array.from(e.target.files);
-      const galleryDiv = document.getElementById("gallery");
-      const currentCount = galleryDiv.children.length;
-      const newCount = currentCount + files.length;
-
-      if (newCount > 50) {
-        alert("Solo puedes subir hasta 50 imágenes.");
-        return;
-      }
-
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = event => {
-          const img = document.createElement("img");
-          img.src = event.target.result;
-          galleryDiv.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    window.onload = () => {
-      if (localStorage.getItem("isAdmin") === "true") {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("panel").style.display = "block";
-        loadSavedData();
-      } else {
-        document.getElementById("login").style.display = "block";
-      }
-    };
+    loadCurrentContent();
   </script>
+
 </body>
 </html>
