@@ -10,39 +10,37 @@
       background: linear-gradient(180deg, #000000, #0f0f0f);
       color: white;
       font-family: 'Poppins', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      margin: 0;
       text-align: center;
     }
-    #login {
-      background: rgba(255,255,255,0.05);
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-    }
-    input {
-      margin: 10px;
-      padding: 10px;
-      width: 200px;
-      border: none;
-      border-radius: 5px;
+    header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     button {
+      margin: 10px;
       padding: 10px 20px;
-      background: #fff;
+      background: white;
+      color: black;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
     }
-    #panel {
-      display: none;
-    }
+    #login, #panel { display: none; }
+    .editable { border: 1px dashed rgba(255,255,255,0.3); padding: 5px; border-radius: 5px; cursor: text; }
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; gap: 10px; }
+    .gallery img { width: 150px; height: 150px; object-fit: cover; border-radius: 5px; cursor: move; }
+    #cover-preview { width: 90%; max-width: 600px; border-radius: 10px; margin-top: 20px; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Panel de Administración — Ink by Dario</h1>
+  </header>
+
+  <!-- Login -->
   <div id="login">
     <h2>Acceso al administrador</h2>
     <p>Introduce la contraseña para continuar</p>
@@ -50,15 +48,30 @@
     <button onclick="checkPassword()">Entrar</button>
   </div>
 
+  <!-- Panel -->
   <div id="panel">
-    <h1>Bienvenido, Dario 👋</h1>
-    <p>Aquí podrás editar tu página, subir imágenes y gestionar tu galería.</p>
+    <h2>Bienvenido, Dario 👋</h2>
+    <p>Edita tu página fácilmente</p>
+
+    <h3>Editar texto principal:</h3>
+    <div id="editable-text" class="editable" contenteditable="true">
+      Arte que deja marca
+    </div>
+
+    <h3>Imagen de portada:</h3>
+    <input type="file" id="cover-upload" accept="image/*">
+    <img id="cover-preview" src="IMG_6967.jpeg" alt="Portada">
+
+    <h3>Galería (máx. 50 fotos):</h3>
+    <input type="file" id="gallery-upload" multiple accept="image/*">
+    <div class="gallery" id="gallery"></div>
+
+    <button onclick="saveChanges()">💾 Guardar cambios</button>
     <button onclick="logout()">Cerrar sesión</button>
-    <!-- Aquí se pueden agregar más funciones después -->
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "JasonyLoki15"; // 🔒 cámbiala cuando quieras
+    const ADMIN_PASSWORD = "JasonyLoki15";
 
     function checkPassword() {
       const input = document.getElementById("password").value;
@@ -66,6 +79,7 @@
         localStorage.setItem("isAdmin", "true");
         document.getElementById("login").style.display = "none";
         document.getElementById("panel").style.display = "block";
+        loadSavedData();
       } else {
         alert("Contraseña incorrecta ❌");
       }
@@ -77,10 +91,72 @@
       document.getElementById("login").style.display = "block";
     }
 
+    function saveChanges() {
+      const text = document.getElementById("editable-text").innerText;
+      const cover = document.getElementById("cover-preview").src;
+      const galleryImages = Array.from(document.querySelectorAll(".gallery img")).map(img => img.src);
+
+      localStorage.setItem("pageText", text);
+      localStorage.setItem("coverImage", cover);
+      localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
+
+      alert("Cambios guardados ✅");
+    }
+
+    function loadSavedData() {
+      const text = localStorage.getItem("pageText");
+      const cover = localStorage.getItem("coverImage");
+      const gallery = JSON.parse(localStorage.getItem("galleryImages") || "[]");
+
+      if (text) document.getElementById("editable-text").innerText = text;
+      if (cover) document.getElementById("cover-preview").src = cover;
+      const galleryDiv = document.getElementById("gallery");
+      galleryDiv.innerHTML = "";
+      gallery.forEach(src => {
+        const img = document.createElement("img");
+        img.src = src;
+        galleryDiv.appendChild(img);
+      });
+    }
+
+    document.getElementById("cover-upload").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = event => document.getElementById("cover-preview").src = event.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("gallery-upload").addEventListener("change", e => {
+      const files = Array.from(e.target.files);
+      const galleryDiv = document.getElementById("gallery");
+      const currentCount = galleryDiv.children.length;
+      const newCount = currentCount + files.length;
+
+      if (newCount > 50) {
+        alert("Solo puedes subir hasta 50 imágenes.");
+        return;
+      }
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = event => {
+          const img = document.createElement("img");
+          img.src = event.target.result;
+          galleryDiv.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
     window.onload = () => {
       if (localStorage.getItem("isAdmin") === "true") {
         document.getElementById("login").style.display = "none";
         document.getElementById("panel").style.display = "block";
+        loadSavedData();
+      } else {
+        document.getElementById("login").style.display = "block";
       }
     };
   </script>
