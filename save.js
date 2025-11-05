@@ -5,8 +5,8 @@ exports.handler = async function(event) {
   try {
     const body = JSON.parse(event.body || '{}');
     const { path, content, password } = body;
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;JasonyLoki15
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;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
     const REPO = process.env.REPO || 'inkbydario/inkbydario.github.io';
     const BRANCH = process.env.BRANCH || 'main';
 
