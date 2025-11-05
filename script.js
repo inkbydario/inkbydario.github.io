@@ -1,67 +1,46 @@
-// --- CONFIGURACIÓN INICIAL --- //
-const CLIENT_ID = "Ov23liHu797WDPs74sex"; 
-const CLIENT_SECRET = "e1c395e6780101b22b74279ff7b5df5faa59a090";
-const REDIRECT_URI = "https://inkbydario.github.io/admin.html";
+// CONFIGURACIÓN BÁSICA
+const GITHUB_TOKEN = "f0fccf406e752da59836853efc1fffb8"; // Tu token
+const REPO = "inkbydario/inkbydario.github.io"; // Tu repositorio
+const BRANCH = "main"; // Rama principal
 
-// --- FUNCIÓN DE LOGIN --- //
-function loginWithGitHub() {
-  const authURL = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo,user`;
-  window.location.href = authURL;
-}
+// Función para actualizar archivos en GitHub
+async function updateFileOnGitHub(path, content) {
+  const apiUrl = `https://api.github.com/repos/${REPO}/contents/${path}`;
 
-// --- DETECTA EL CÓDIGO DEVUELTO POR GITHUB --- //
-async function handleGitHubRedirect() {
-  const code = new URLSearchParams(window.location.search).get("code");
-  if (!code) return;
+  // Primero obtenemos el SHA del archivo actual
+  const currentFile = await fetch(apiUrl, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+  }).then(res => res.json());
 
-  try {
-    // En un entorno real esto iría en un backend (por seguridad),
-    // pero aquí haremos una llamada proxy temporal de demostración
-    const response = await fetch(`https://corsproxy.io/?https://github.com/login/oauth/access_token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        code: code,
-        redirect_uri: REDIRECT_URI
-      })
-    });
+  const sha = currentFile.sha;
 
-    const data = await response.json();
+  // Codificamos el nuevo contenido en Base64
+  const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
-    if (data.access_token) {
-      localStorage.setItem("github_token", data.access_token);
-      alert("Inicio de sesión exitoso ✅");
-      window.location.href = "index.html"; // Redirige al inicio del panel
-    } else {
-      alert("⚠️ Error al obtener token. Vuelve a intentar.");
-      console.error(data);
-    }
-  } catch (error) {
-    console.error("Error al conectar con GitHub:", error);
-    alert("Error de conexión con GitHub ❌");
+  // Subimos los cambios
+  const response = await fetch(apiUrl, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Actualización automática desde panel admin`,
+      content: encodedContent,
+      sha: sha,
+      branch: BRANCH
+    })
+  });
+
+  if (response.ok) {
+    alert("✅ Cambios guardados y publicados en tu sitio.");
+  } else {
+    alert("❌ Error al guardar en GitHub. Revisa tu token o conexión.");
   }
 }
 
-// --- RECONOCER SI EL USUARIO YA ESTÁ LOGUEADO --- //
-function checkLogin() {
-  const token = localStorage.getItem("github_token");
-  if (token) {
-    document.body.classList.add("logged-in");
-  }
-}
-
-// --- EJECUCIÓN AUTOMÁTICA --- //
-window.onload = () => {
-  if (window.location.pathname.endsWith("admin.html")) {
-    handleGitHubRedirect();
-    checkLogin();
-  }
-};
-
-// --- EVENTO DEL BOTÓN --- //
-document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) loginBtn.addEventListener("click", loginWithGitHub);
+// Escucha el botón "Guardar" del panel admin
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  const updatedHTML = document.documentElement.outerHTML;
+  await updateFileOnGitHub("index.html", updatedHTML);
 });
